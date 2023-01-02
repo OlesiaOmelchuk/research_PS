@@ -9,9 +9,12 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(MASS)
+#color palette #F5B4AF - pink, #B7D079 - green, #79D8DB - blue, #DCB7F9 - purple
 ```
 
+
 ```{r}
+#preprocessing data
 data <- read.csv("udemy_dataset.csv")
 data <- data[, c(5,6,7,8,9,10,12)]
 data$course_level[data$course_level == "Beginner"] <- 0
@@ -19,14 +22,17 @@ data$course_level[data$course_level == "Intermediate"] <- 1
 data$course_level[data$course_level == "Expert"] <- 2
 data$course_level[data$course_level == "All Levels"] <- 3
 data$course_level <- as.integer(data$course_level)
-#data <- data[data$coures_reviews < 200, ]
-#nrow(data)
+head(data)
 ```
 
 ```{r}
-hist(data$course_rating, col = "#cc33ff", border = "white", main="Distribution of courses' ratings", breaks = seq(1,5,0.1))
+hist(data$course_rating, col = "#DCB7F9", border = "white", main="Distribution of courses' ratings", breaks = seq(1,5,0.1))
 box(bty="l")
 grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
+```
+```{r}
+hist(data$course_level, col = "#B7D079", border = "white", main="Distribution of courses' levels", breaks = seq(-1,3))
+box(bty="l")
 ```
 
 ```{r}
@@ -37,21 +43,23 @@ summary(data)
 ```{r}
 ggplot(data, aes(x=price,fill=factor(high)))+geom_density(alpha=0.5)+
  xlab(label = "Price")+
- ggtitle("Distribution of price")+
- theme_minimal()
+ ggtitle("Distribution of price taking course rating into account")
+```
+```{r}
+quantile(data$coures_reviews, c(.9, .95, .99))
+data_reviews <- data[data$coures_reviews < 178, ]
+ggplot(data_reviews, aes(x=coures_reviews,fill=factor(high)))+geom_density(alpha=0.5)+
+ xlab(label = "Number of reviews")+
+ ggtitle("Distribution of number of reviews taking course rating into account")
 ```
 
 ```{r}
 ggplot(data, aes(x=price,fill=factor(course_level)))+geom_density(alpha=0.5)+
  xlab(label = "Price")+
- ggtitle("Distribution of price")+
- theme_minimal()
+ ggtitle("Distribution of price taking course level into account")
 ```
 
-```{r}
-hist(data$course_level, col = "#99CC99", border = "white", main="Distribution of courses' ratings", breaks = seq(-1,3))
-box(bty="l")
-```
+
 
 ```{r}
 correlation <- cor(data)
