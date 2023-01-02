@@ -26,40 +26,88 @@ head(data)
 ```
 
 ```{r}
-hist(data$course_rating, col = "#DCB7F9", border = "white", main="Distribution of courses' ratings", breaks = seq(1,5,0.1))
+#plotted only distributions of the features that are used in tests
+hist(data$course_rating, col = "#DCB7F9", xlab="Rating", border = "white", main="Distribution of courses' ratings", breaks = seq(1,5,0.1))
+box(bty="l")
+grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
+
+```
+```{r}
+hist(data$course_level, col = "#B7D079", xlab="Level", border = "white", main="Distribution of courses' levels", breaks = seq(-1,3))
+box(bty="l")
+```
+```{r}
+quantile(data$course_enrollmenters, c(.9, .95, .99))
+data_enrollments <- data[data$course_enrollmenters < 3482 & data$course_enrollmenters != 0 ,]
+hist(data_enrollments$course_enrollmenters, col = "#F5B4AF", xlab="Number of enrollmenters", border = "white", main="Distribution of courses' enrollmenters")
+box(bty="l")
+```
+```{r}
+hist(data$price, col = "#79D8DB", xlab="Price", border = "white", main="Distribution of courses' prices")
 box(bty="l")
 grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
 ```
-```{r}
-hist(data$course_level, col = "#B7D079", border = "white", main="Distribution of courses' levels", breaks = seq(-1,3))
-box(bty="l")
-```
+
 
 ```{r}
 data$high <- data$course_rating >= 4
 summary(data)
+# head(data)
 ```
 
 ```{r}
 ggplot(data, aes(x=price,fill=factor(high)))+geom_density(alpha=0.5)+
  xlab(label = "Price")+
- ggtitle("Distribution of price taking course rating into account")
+ ggtitle("Distribution of price taking rating into account")
 ```
 ```{r}
 quantile(data$coures_reviews, c(.9, .95, .99))
 data_reviews <- data[data$coures_reviews < 178, ]
 ggplot(data_reviews, aes(x=coures_reviews,fill=factor(high)))+geom_density(alpha=0.5)+
  xlab(label = "Number of reviews")+
- ggtitle("Distribution of number of reviews taking course rating into account")
+ ggtitle("Distribution of number of reviews taking rating into account")
+```
+```{r}
+quantile(data$course_enrollmenters, c(.9, .95, .99))
+data_enrollments <- data[data$course_enrollmenters < 3482, ]
+ggplot(data_enrollments, aes(x=course_enrollmenters,fill=factor(high)))+geom_density(alpha=0.5)+
+ xlab(label = "Number of enrollmenters")+
+ ggtitle("Distribution of number of enrollmenters taking rating into account")
+```
+```{r}
+quantile(data$course_totalHourse, c(.9, .95, .99))
+data_hours <- data[data$course_totalHourse < 37, ]
+ggplot(data_hours, aes(x=course_totalHourse,fill=factor(high)))+geom_density(alpha=0.5)+
+ xlab(label = "Hours")+
+ ggtitle("Distribution of course hours taking rating into account")
 ```
 
 ```{r}
 ggplot(data, aes(x=price,fill=factor(course_level)))+geom_density(alpha=0.5)+
  xlab(label = "Price")+
- ggtitle("Distribution of price taking course level into account")
+ ggtitle("Distribution of price taking level into account")
 ```
 
 
+```{r}
+data_hours <- data[data$course_totalHourse < 37, ]
+ggplot(data_hours, aes(x=course_totalHourse,fill=factor(course_level)))+geom_density(alpha=0.5)+
+ xlab(label = "Hours")+
+ ggtitle("Distribution of course hours taking level into account")
+```
+
+
+```{r}
+
+quantile(data$course_enrollmenters)
+data %>% 
+  mutate(popularity = case_when((course_enrollmenters <= 23) ~ 1, (course_enrollmenters > 23  & course_enrollmenters <= 153) ~ 2, (course_enrollmenters > 153  & course_enrollmenters <= 1099) ~ 3, (course_enrollmenters > 1099) ~ 4))
+
+data$popularity
+ggplot(data, aes(x=coures_reviews,fill=factor(popularity)))+geom_density(alpha=0.5)+
+ xlab(label = "Number of reviews")+
+ ggtitle("Distribution of number of reviews taking enrollmenters into account")
+```
 
 ```{r}
 correlation <- cor(data)
