@@ -5,30 +5,18 @@ output: html_notebook
 ---
 
 ```{r}
-
-library(tidyr)
-library(dplyr)
 library(ggplot2)
-library(MASS)
 ```
 
 ```{r}
-data <- read.csv("udemy_dataset.csv")
-data <- data[, c(5,6,7,8,9,10,12)]
-data$course_level[data$course_level == "Beginner"] <- 0
-data$course_level[data$course_level == "Intermediate"] <- 1
-data$course_level[data$course_level == "Expert"] <- 2
-data$course_level[data$course_level == "All Levels"] <- 3
-data$course_level <- as.integer(data$course_level)
+data <- read.csv("udemy_dataset.csv") 
+head(data)
 ```
 
 ```{r}
-hist(data$course_rating, col = "#cc33ff", border = "white", main="Distribution of courses' ratings", breaks = seq(1,5,0.1))
-box(bty="l")
-grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
-```
-
-```{r}
-data$high <- data$course_rating > 4
-summary(data)
+data$high_rating <- data$course_rating >= 4
+ggplot(data, aes(x=price,fill=factor(high_rating)))+geom_density(alpha=0.5)+
+ xlab(label = "Fixed Acidity Level")+
+ ggtitle("Distribution of Fixed Acidity Levels")+
+ theme_minimal()
 ```
