@@ -99,17 +99,25 @@ ggplot(data_hours, aes(x=course_totalHourse,fill=factor(course_level)))+geom_den
 
 ```{r}
 
-# quantile(data$course_enrollmenters)
-# 0 - 38 676
-# 38 677 - 77 353
-# 77 353 - 116 029
-# 166 030 - 154706
-max(data$course_enrollmenters)
+quantile(data$course_enrollmenters)
+# 0 - 870
+# 871 - 1740
+# 1741 - 2610
+# 2611 - 3480
 
-data <- data%>%
-  mutate(popularity = case_when((data$course_enrollmenters <= 38676) ~ 1, (data$course_enrollmenters > 38677  & data$course_enrollmenters <= 77353) ~ 2, (data$course_enrollmenters > 77354  & data$course_enrollmenters <= 116029) ~ 3, (data$course_enrollmenters > 166030) ~ 4))
 
-ggplot(data, aes(x=coures_reviews,fill=factor(popularity)))+geom_density(alpha=0.5)+
+data_enrollments <- data[data$course_enrollmenters < 3482, ]
+
+# quantile(data_enrollments$course_enrollmenters, c(.9, .95, .99))
+max(data_enrollments$course_enrollmenters)
+
+data_enrollments <- data_enrollments%>%
+  mutate(popularity = case_when((data_enrollments$course_enrollmenters <= 870) ~ 1, 
+                                (data_enrollments$course_enrollmenters > 870  & data_enrollments$course_enrollmenters <= 1740) ~ 2, 
+                                (data_enrollments$course_enrollmenters > 1740  & data_enrollments$course_enrollmenters <= 2610) ~ 3, 
+                                (data_enrollments$course_enrollmenters > 2610) ~ 4))
+
+ggplot(data_enrollments, aes(x=coures_reviews,fill=factor(popularity)))+geom_density(alpha=0.5)+
  xlab(label = "Number of reviews")+
  ggtitle("Distribution of number of reviews taking enrollmenters into account")
 ```
