@@ -19,6 +19,8 @@ data$course_level[data$course_level == "Intermediate"] <- 1
 data$course_level[data$course_level == "Expert"] <- 2
 data$course_level[data$course_level == "All Levels"] <- 3
 data$course_level <- as.integer(data$course_level)
+#data <- data[data$coures_reviews < 200, ]
+#nrow(data)
 ```
 
 ```{r}
@@ -28,7 +30,7 @@ grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
 ```
 
 ```{r}
-data$high <- data$course_rating > 4
+data$high <- data$course_rating >= 4
 summary(data)
 ```
 
@@ -37,4 +39,16 @@ ggplot(data, aes(x=price,fill=factor(high)))+geom_density(alpha=0.5)+
  xlab(label = "Price")+
  ggtitle("Distribution of price")+
  theme_minimal()
+```
+
+```{r}
+ggplot(data, aes(x=price,fill=factor(course_level)))+geom_density(alpha=0.5)+
+ xlab(label = "Price")+
+ ggtitle("Distribution of price")+
+ theme_minimal()
+```
+
+```{r}
+hist(data$course_level, col = "#660033", border = "white", main="Distribution of courses' ratings", breaks = seq(-1,3))
+box(bty="l")
 ```
