@@ -8,7 +8,7 @@ output: html_notebook
 
 ## Project setting
 
-Udemy is an online learning and teaching marketplace with over 130000 courses and 35 million students. In this project we will be testing different hypothesis about characteristics of the set of courses from the database that covers 2883 academy and teaching courses provided by Udemy: we will check their independence and whether it is possible to predict some features based on other provided values.
+Udemy is an online learning and teaching marketplace with over 130000 courses and 35 million students. In this project we will be testing different hypotheses about characteristics of the set of courses from the database that covers 2883 academy and teaching courses provided by Udemy: we will check their independence and whether it is possible to predict some features based on other provided values.
 
 The link for database: <https://www.kaggle.com/datasets/mariahalshiekh/udemy-course-academy-teaching>
 
@@ -24,7 +24,21 @@ library(MASS)
 #color palette #F5B4AF - pink, #B7D079 - green, #79D8DB - blue, #DCB7F9 - purple
 ```
 
-There were a lot of features provided in the original dataset. Still, the title of the course and names of teachers, for example, wasn't that important for our analysis, so we took into account only valuable data: - course rating - number of course reviews - total hours to pass the course - number of lectures - course level - price - number of enrollments
+There were a lot of features provided in the original dataset. Still, the title of the course and names of teachers, for example, wasn't that important for our analysis, so we took into account only valuable data:
+
+-   course rating
+
+-   number of course reviews
+
+-   total hours to pass the course
+
+-   number of lectures
+
+-   course level
+
+-   price
+
+-   number of enrollments
 
 We also changed the string representation of course level to integer numbers as it is more convenient to work with.
 
@@ -41,8 +55,11 @@ head(data)
 
 ## Analyzing the data
 
+### Distributions of main features
+
+To better understand the data we were working with, we decided to plot the distributions of the features that we were planning to use in hypotheses testing.
+
 ```{r}
-#plotted only distributions of the features that are used in tests
 hist(data$course_rating, col = "#DCB7F9", xlab="Rating", border = "white", main="Distribution of courses' ratings", breaks = seq(1,5,0.1))
 box(bty="l")
 grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
@@ -53,6 +70,8 @@ grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
 hist(data$course_level, col = "#B7D079", xlab="Level", border = "white", main="Distribution of courses' levels", breaks = seq(-1,3))
 box(bty="l")
 ```
+
+While plotting the number of enrollments, we run into a problem that our graph isn't representative and doesn't give that much information as there is a huge span in this feature (the min value is 0, max - 154 706, and mean 1733). That's why we decided to find the percentiles and plot only 90% of the data to see how it behaves. (**in hypotheses testing, we used the complete data**)
 
 ```{r}
 quantile(data$course_enrollmenters, c(.9, .95, .99))
@@ -67,6 +86,16 @@ box(bty="l")
 grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
 ```
 
+### Checking how one feature influences other ones
+
+As we wanted to check the dependence of some features of the set of courses, we decided to plot their distributions while being split into some categories.
+
+To check how different features influence the *course rating* we split our data into two categories:
+
+-   high: rating \>= 4
+
+-   low: rating \< 4
+
 ```{r}
 data$high <- data$course_rating >= 4
 summary(data)
@@ -78,6 +107,8 @@ ggplot(data, aes(x=price,fill=factor(high)))+geom_density(alpha=0.5)+
  xlab(label = "Price")+
  ggtitle("Distribution of price taking rating into account")
 ```
+
+!*for number of reviews, enrollments and course total hours we used the same trick with percentiles as before*!
 
 ```{r}
 quantile(data$coures_reviews, c(.9, .95, .99))
@@ -102,6 +133,8 @@ ggplot(data_hours, aes(x=course_totalHourse,fill=factor(high)))+geom_density(alp
  xlab(label = "Hours")+
  ggtitle("Distribution of course hours taking rating into account")
 ```
+
+The distributions turned out to be pretty similar with some quite expected differences (for example, that courses with higher ratings have a bigger number of enrollments); that's why we decided to split our data based on other factors, such as *course level* and *number of enrollments*.
 
 ```{r}
 ggplot(data, aes(x=price,fill=factor(course_level)))+geom_density(alpha=0.5)+
@@ -144,9 +177,19 @@ ggplot(data_enrollments, aes(x=coures_reviews,fill=factor(popularity)))+geom_den
 ```{r}
 correlation <- cor(data)
 print(correlation[, "coures_reviews"])
+print(correlation[, "course_rating"])
+print(correlation[, "course_level"])
 ```
 
-## Testing hyposesis
+As we can see on previous graphs and correlation results, it seems like there isn't almost any dependency between the features (course enrollments and the number of reviews have the highest correlation, but it is pretty obvious and not interesting to analyze). To check this assumption we decided to test some hypotheses about independence of the features.
+
+## Testing hypotheses
+
+
+
+$H_0$ - there is no dependency between the **course level** and **course enrollments**
+
+$H_1$ - there is a dependency between those metrics
 
 ```{r}
 number_of_enrollmenters <- unique(data$course_enrollmenters)
@@ -166,23 +209,31 @@ df
 chisq.test(df)
 ```
 
+$H_0$ - there is no dependency between the **course price** and **course rating** 
+
+$H_1$ - there is a dependency between those metrics
+
 ```{r}
-number_of_enrollmenters <- unique(data$price)
+prices <- unique(data$price)
 r.2 <- c()
 r.3 <- c()
 r.4 <- c()
 r.5 <- c()
 
-for (i in number_of_enrollmenters){
+for (i in prices){
   r.2 <- c(r.2, nrow(data[data$course_rating <= 2.5 & data$price == i,]))
   r.3 <- c(r.3, nrow(data[data$course_rating > 2.5 & data$course_rating <= 3.5 & data$price == i,]))
   r.4 <- c(r.4, nrow(data[data$course_rating > 3.5 & data$course_rating <= 4.5 & data$price == i,]))
   r.5 <- c(r.5, nrow(data[data$course_rating > 4.5 & data$price == i,]))
 }
-df1 <- data.frame(r.2,r.3,r.4,r.5, row.names = number_of_enrollmenters)
+df1 <- data.frame(r.2,r.3,r.4,r.5, row.names = prices)
 df1
 chisq.test(df1)
 ```
+
+$H_0$ - there is no dependency between the **course rating** and **course level** 
+
+$H_1$ - there is a dependency between those metrics
 
 ```{r}
 ratings <- unique(data$course_rating)
