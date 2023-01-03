@@ -1,7 +1,9 @@
 ---
 title: "Research project"
 author: "Sofiia Folvarochna, Anastasiia Beheni, Olesia Omelchuk"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Analyzing Udemy courses
@@ -99,7 +101,6 @@ To check how different features influence the *course rating* we split our data 
 ```{r}
 data$high <- data$course_rating >= 4
 summary(data)
-# head(data)
 ```
 
 ```{r}
@@ -187,7 +188,7 @@ As we can see on previous graphs and correlation results, it seems like there is
 
 In all following pairs of hypotheses we are going to test the independence of two characteristics that's why we use **Chi-squared test for independence**.
 
-Here is the corresponding test statistic: $$\chi^2 = \sum_{i=1}^R\sum_{j=1}^C\frac{(o_{ij}-e_{ij})^2}{e_{ij}}$$ , where $o_{ij}$ is the observed value in the i-th row and j-th column, and $e_{ij}$ is the expected value.
+Here is the corresponding test statistic: $$\chi^2 = \sum_{i=1}^R\sum_{j=1}^C\frac{(o_{ij}-e_{ij})^2}{e_{ij}}$$ where $o_{ij}$ is the observed value in the i-th row and j-th column, and $e_{ij}$ is the expected value.
 
 Then the calculated value of the statistic is compared to the corresponding value of $\chi^2_{(R-1)(C-1)}$ with $(R-1)(C-1)$ degrees of freedom and for a certain confidence level.
 
@@ -268,4 +269,5 @@ chisq.test(df2)
 ```
 
 ## Conclusion
+
 As we can see, the p-value for all tests is quite significant; that's why we do not reject $H_0$, which means that the features of the courses are independent of each other. Actually, this is not surprising after seeing the plots of distributions and the correlation coefficients for corresponding features. Taking all this into account, there is no sense in building a regression model or predicting some values based on other ones.
