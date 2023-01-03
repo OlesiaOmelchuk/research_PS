@@ -4,17 +4,31 @@ author: "Sofiia Folvarochna, Anastasiia Beheni, Olesia Omelchuk"
 output: html_notebook
 ---
 
+# Analyzing Udemy courses
+
+## Project setting
+
+Udemy is an online learning and teaching marketplace with over 130000 courses and 35 million students. In this project we will be testing different hypothesis about characteristics of the set of courses from the database that covers 2883 academy and teaching courses provided by Udemy: we will check their independence and whether it is possible to predict some features based on other provided values.
+
+The link for database: <https://www.kaggle.com/datasets/mariahalshiekh/udemy-course-academy-teaching>
+
+## Preparing and cleaning the data
+
 ```{r}
+# some useful libraries
 library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(MASS)
+
 #color palette #F5B4AF - pink, #B7D079 - green, #79D8DB - blue, #DCB7F9 - purple
 ```
 
+There were a lot of features provided in the original dataset. Still, the title of the course and names of teachers, for example, wasn't that important for our analysis, so we took into account only valuable data: - course rating - number of course reviews - total hours to pass the course - number of lectures - course level - price - number of enrollments
+
+We also changed the string representation of course level to integer numbers as it is more convenient to work with.
 
 ```{r}
-#preprocessing data
 data <- read.csv("udemy_dataset.csv")
 data <- data[, c(5,6,7,8,9,10,12)]
 data$course_level[data$course_level == "Beginner"] <- 0
@@ -25,6 +39,8 @@ data$course_level <- as.integer(data$course_level)
 head(data)
 ```
 
+## Analyzing the data
+
 ```{r}
 #plotted only distributions of the features that are used in tests
 hist(data$course_rating, col = "#DCB7F9", xlab="Rating", border = "white", main="Distribution of courses' ratings", breaks = seq(1,5,0.1))
@@ -32,22 +48,24 @@ box(bty="l")
 grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
 
 ```
+
 ```{r}
 hist(data$course_level, col = "#B7D079", xlab="Level", border = "white", main="Distribution of courses' levels", breaks = seq(-1,3))
 box(bty="l")
 ```
+
 ```{r}
 quantile(data$course_enrollmenters, c(.9, .95, .99))
 data_enrollments <- data[data$course_enrollmenters < 3482 & data$course_enrollmenters != 0 ,]
 hist(data_enrollments$course_enrollmenters, col = "#F5B4AF", xlab="Number of enrollmenters", border = "white", main="Distribution of courses' enrollmenters")
 box(bty="l")
 ```
+
 ```{r}
 hist(data$price, col = "#79D8DB", xlab="Price", border = "white", main="Distribution of courses' prices")
 box(bty="l")
 grid(nx=NA,ny=NULL,lty=1,lwd=1,col="lightgrey")
 ```
-
 
 ```{r}
 data$high <- data$course_rating >= 4
@@ -60,6 +78,7 @@ ggplot(data, aes(x=price,fill=factor(high)))+geom_density(alpha=0.5)+
  xlab(label = "Price")+
  ggtitle("Distribution of price taking rating into account")
 ```
+
 ```{r}
 quantile(data$coures_reviews, c(.9, .95, .99))
 data_reviews <- data[data$coures_reviews < 178, ]
@@ -67,6 +86,7 @@ ggplot(data_reviews, aes(x=coures_reviews,fill=factor(high)))+geom_density(alpha
  xlab(label = "Number of reviews")+
  ggtitle("Distribution of number of reviews taking rating into account")
 ```
+
 ```{r}
 quantile(data$course_enrollmenters, c(.9, .95, .99))
 data_enrollments <- data[data$course_enrollmenters < 3482, ]
@@ -74,6 +94,7 @@ ggplot(data_enrollments, aes(x=course_enrollmenters,fill=factor(high)))+geom_den
  xlab(label = "Number of enrollmenters")+
  ggtitle("Distribution of number of enrollmenters taking rating into account")
 ```
+
 ```{r}
 quantile(data$course_totalHourse, c(.9, .95, .99))
 data_hours <- data[data$course_totalHourse < 37, ]
@@ -88,14 +109,12 @@ ggplot(data, aes(x=price,fill=factor(course_level)))+geom_density(alpha=0.5)+
  ggtitle("Distribution of price taking level into account")
 ```
 
-
 ```{r}
 data_hours <- data[data$course_totalHourse < 37, ]
 ggplot(data_hours, aes(x=course_totalHourse,fill=factor(course_level)))+geom_density(alpha=0.5)+
  xlab(label = "Hours")+
  ggtitle("Distribution of course hours taking level into account")
 ```
-
 
 ```{r}
 
@@ -126,6 +145,8 @@ ggplot(data_enrollments, aes(x=coures_reviews,fill=factor(popularity)))+geom_den
 correlation <- cor(data)
 print(correlation[, "coures_reviews"])
 ```
+
+## Testing hyposesis
 
 ```{r}
 number_of_enrollmenters <- unique(data$course_enrollmenters)
@@ -181,3 +202,5 @@ df2 <- data.frame(l.0,l.1,l.2,l.3, row.names = ratings)
 
 chisq.test(df2)
 ```
+
+## Conclusion
